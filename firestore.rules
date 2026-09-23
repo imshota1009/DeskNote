@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ルームIDを知っている人だけが、その部屋を読み書きできる。
+    // IDは20文字の乱数なので、総当たりでは事実上たどり着けない。
+    match /rooms/{roomId} {
+      allow read, write: if roomId.size() >= 16 && roomId.size() <= 64;
+    }
+  }
+}

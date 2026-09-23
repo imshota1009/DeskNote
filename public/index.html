@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="今日のノート">
+    <meta name="theme-color" content="#FDFCF8">
+    <meta name="robots" content="noindex, nofollow">
+    <title>今日のノート</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-180.png">
+    <link rel="icon" href="icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- ルームIDを入れる入口 -->
+    <div class="gate" id="gate">
+        <div class="gate-paper">
+            <div class="gate-me">
+                <span class="gate-me-face" id="myFace"></span>
+                <span class="gate-me-text">
+                    <span class="gate-me-label">あなたの顔</span>
+                    <span class="gate-me-sub">この端末では、いつもこの顔です</span>
+                </span>
+            </div>
+
+            <h1 class="gate-title">今日のノート</h1>
+
+            <div class="gate-lists hidden" id="gateLists">
+                <div class="gate-list-group hidden" id="createdGroup">
+                    <h2 class="gate-list-title">自分のノート</h2>
+                    <ul class="gate-list" id="createdList"></ul>
+                </div>
+                <div class="gate-list-group hidden" id="joinedGroup">
+                    <h2 class="gate-list-title">参加したノート</h2>
+                    <ul class="gate-list" id="joinedList"></ul>
+                </div>
+            </div>
+
+            <p class="gate-lead">ノートIDを入れて開く</p>
+
+            <form class="gate-form" id="gateForm" autocomplete="off">
+                <input type="text" id="gateId" placeholder="ノートID" spellcheck="false" autocapitalize="off">
+                <button type="submit" class="gate-btn">開く</button>
+            </form>
+            <p class="gate-error" id="gateError"></p>
+
+            <div class="gate-or"><span>はじめての方は</span></div>
+            <button class="gate-new" id="gateNew">新しいノートを作る</button>
+            <button class="gate-demo" id="gateDemo">お試しで中を見てみる</button>
+
+            <div class="gate-made hidden" id="gateMade">
+                <p class="gate-made-lead">ノートができました。このIDは大切に控えてください。</p>
+                <p class="gate-made-id" id="gateMadeId"></p>
+                <button class="gate-copy" id="gateCopy">IDをコピー</button>
+                <label class="gate-made-name-row">
+                    <span>呼び名（自分だけに表示されます）</span>
+                    <input type="text" id="gateMadeLabel" maxlength="20" placeholder="例：就活ノート">
+                </label>
+                <p class="gate-note">IDを知っている人は中身を見られます。人に見せないでください。</p>
+                <button class="gate-btn" id="gateGo">このノートを開く</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sky" id="sky" aria-hidden="true"></div>
+
+    <div class="demo-bar hidden" id="demoBar">
+        <span class="demo-note">お試し中です。見本の内容で、書いても保存されません。</span>
+        <button class="demo-make" id="demoMake">自分のノートを作る</button>
+    </div>
+
+    <!-- 本体 -->
+    <div class="page hidden" id="page">
+        <div class="binding" aria-hidden="true">
+            <span class="hole"></span>
+            <span class="hole"></span>
+            <span class="hole"></span>
+            <span class="hole"></span>
+            <span class="hole"></span>
+        </div>
+
+        <div class="sheet">
+            <div class="col col-left">
+                <header class="clock-head">
+                    <div class="head-row">
+                        <p class="date" id="date">　</p>
+                        <button class="head-btn" id="homeBtn" title="入口に戻る">ホーム</button>
+                        <button class="head-btn" id="roomBtn" title="ノートIDを表示">ID</button>
+                        <button class="head-btn" id="skyBtn" title="天気の演出を切り替える">天気</button>
+                        <select class="weather-pick hidden" id="weatherPick" title="お試し用に天気を変える">
+                            <option value="sun">晴れ</option>
+                            <option value="suncloud">晴れ時々くもり</option>
+                            <option value="cloud">くもり</option>
+                            <option value="fog">霧</option>
+                            <option value="rain">雨</option>
+                            <option value="snow">雪</option>
+                            <option value="thunder">雷雨</option>
+                        </select>
+                        <span class="save-state" id="saveState"></span>
+                    </div>
+                    <div class="clock-row">
+                        <p class="clock" id="clock">--:--</p>
+                        <div class="weather hidden" id="weather">
+                            <span class="w-icon" id="wIcon"></span>
+                            <span class="w-text">
+                                <span class="w-temp" id="wTemp"></span>
+                                <span class="w-label" id="wLabel"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="members hidden" id="members">
+                        <span class="member-faces" id="memberFaces"></span>
+                        <span class="members-label" id="membersLabel"></span>
+                    </div>
+                </header>
+
+                <section class="card card-todo">
+                    <h2 class="card-title">
+                        やること
+                        <span class="count" id="todoCount"></span>
+                        <button class="add-mini" data-add="todo" aria-label="やることを追加"><i class="ico-plus"></i></button>
+                    </h2>
+                    <ul class="list" id="todoList"></ul>
+                    <p class="empty" id="todoEmpty">まだ何もありません</p>
+                </section>
+            </div>
+
+            <div class="col col-right">
+                <section class="card card-today">
+                    <h2 class="card-title">
+                        今日の予定
+                        <span class="count" id="todayCount"></span>
+                        <button class="add-mini" data-add="plan" aria-label="予定を追加"><i class="ico-plus"></i></button>
+                    </h2>
+                    <ul class="list" id="todayList"></ul>
+                    <p class="empty" id="todayEmpty">予定なし</p>
+                </section>
+
+                <section class="card card-tabs">
+                    <nav class="tabs" id="tabs">
+                        <button class="tab is-on" data-tab="tomorrow">明日<span class="tab-n" id="nTomorrow"></span></button>
+                        <button class="tab" data-tab="upcoming">これから<span class="tab-n" id="nUpcoming"></span></button>
+                        <button class="tab" data-tab="past">過去<span class="tab-n" id="nPast"></span></button>
+                        <button class="tab" data-tab="cal">カレンダー</button>
+                        <button class="add-mini tabs-add" data-add="plan" aria-label="追加"><i class="ico-plus"></i></button>
+                    </nav>
+                    <ul class="list" id="tabList"></ul>
+                    <p class="empty" id="tabEmpty">なし</p>
+
+                    <!-- カレンダー。予定の入っている日にしるしが付く -->
+                    <div class="cal hidden" id="cal">
+                        <div class="cal-head">
+                            <button class="cal-move" id="calPrev" aria-label="前の月"><i class="ico-arrow-l"></i></button>
+                            <span class="cal-month" id="calMonth"></span>
+                            <button class="cal-move" id="calNext" aria-label="次の月"><i class="ico-arrow-r"></i></button>
+                            <button class="cal-today" id="calToday">今月</button>
+                        </div>
+                        <div class="cal-week" aria-hidden="true">
+                            <span>日</span><span>月</span><span>火</span><span>水</span>
+                            <span>木</span><span>金</span><span>土</span>
+                        </div>
+                        <div class="cal-grid" id="calGrid"></div>
+                        <div class="cal-day" id="calDay">
+                            <p class="cal-day-head" id="calDayHead"></p>
+                            <ul class="list cal-day-list" id="calDayList"></ul>
+                            <p class="empty" id="calDayEmpty">予定なし</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- 登録フォーム -->
+    <div class="sheet-modal hidden" id="modal">
+        <div class="modal-paper">
+            <div class="modal-head">
+                <div class="modal-kinds" id="modalKinds">
+                    <button class="mkind is-on" data-form="plan">予定</button>
+                    <button class="mkind" data-form="todo">やること</button>
+                </div>
+                <button class="modal-close" id="modalClose" aria-label="閉じる"><i class="ico-close"></i></button>
+            </div>
+
+            <form id="entryForm" autocomplete="off">
+                <label class="f-row"><span class="f-label">会社名</span>
+                    <input type="text" id="fCompany" maxlength="40" placeholder="（任意）">
+                </label>
+
+                <label class="f-row"><span class="f-label">内容</span>
+                    <input type="text" id="fTitle" maxlength="80" placeholder="セミナー名・やることなど" required>
+                </label>
+
+                <div class="f-row f-when" id="rowDate"><span class="f-label" id="labelDate">日付</span>
+                    <input type="date" id="fDate">
+                    <input type="time" id="fTime">
+                    <span class="f-tilde" id="fTilde">〜</span>
+                    <input type="time" id="fEnd">
+                </div>
+
+                <div class="f-row f-kinds" id="rowKind"><span class="f-label">種別</span>
+                    <div class="kind-pick" id="kindPick">
+                        <button type="button" class="kpick is-on" data-kind="seminar">セミナー</button>
+                        <button type="button" class="kpick" data-kind="intern">インターン</button>
+                        <button type="button" class="kpick" data-kind="selection">選考</button>
+                        <button type="button" class="kpick" data-kind="">なし</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="modal-save" id="modalSave">登録する</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ノートIDの表示 -->
+    <div class="sheet-modal hidden" id="roomModal">
+        <div class="modal-paper modal-narrow">
+            <div class="modal-head">
+                <h3 class="modal-title">ノートID</h3>
+                <button class="modal-close" id="roomClose" aria-label="閉じる"><i class="ico-close"></i></button>
+            </div>
+            <p class="gate-made-id" id="roomIdText"></p>
+            <button class="gate-copy" id="roomCopy">IDをコピー</button>
+            <p class="gate-note">別の端末でこのIDを入れると、同じノートが開きます。人に見せないでください。</p>
+            <button class="room-reset" id="presenceReset">「参加中」の表示をリセット</button>
+            <p class="gate-note">実際にはいないはずの人数が出ているときに押してください。</p>
+
+            <button class="room-rotate hidden" id="roomRotate">ノートIDを変更する</button>
+            <p class="gate-note gate-note-host hidden" id="rotateNote">今のIDを知っている人（キックした相手も含む）は、変更後アクセスできなくなります。新しいIDは、また信頼できる人にだけ伝えてください。</p>
+
+            <button class="room-leave" id="roomLeave">このノートを閉じる（IDを忘れる）</button>
+        </div>
+    </div>
+
+    <!-- 消す前の確認。✖を押し間違えても、ここで止まる -->
+    <div class="sheet-modal hidden" id="confirmModal">
+        <div class="modal-paper modal-narrow">
+            <div class="modal-head">
+                <h3 class="modal-title" id="confirmTitle">消しますか？</h3>
+                <button class="modal-close" id="confirmClose" aria-label="閉じる"><i class="ico-close"></i></button>
+            </div>
+            <p class="confirm-target" id="confirmTarget"></p>
+            <p class="gate-note">消すと元に戻せません。</p>
+            <div class="confirm-btns">
+                <button class="confirm-cancel" id="confirmCancel">やめる</button>
+                <button class="confirm-ok" id="confirmOk">消す</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="demo.js"></script>
+    <script type="module" src="app.js"></script>
+    <!-- アバター描画（Humation, MIT）。1本にまとめてあるので、モジュール読み込みに対応していない環境でも動く -->
+    <script src="vendor/humation/avatar.bundle.js?v=1"
+            onerror="window.humationFailed=true;window.dispatchEvent(new Event('humationFailed'))"></script>
+    <script>
+        // 読み込みが終わらないときのために、時間で見切りをつける
+        setTimeout(function () {
+            if (!window.HumationAvatar) {
+                window.humationFailed = true;
+                window.dispatchEvent(new Event('humationFailed'));
+            }
+        }, 8000);
+    </script>
+</body>
+
+</html>

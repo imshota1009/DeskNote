@@ -1,0 +1,22 @@
+{
+  "name": "今日のノート",
+  "short_name": "今日のノート",
+  "description": "日付・時計・やること・今日と明日の予定を、1画面で見るノート",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#FDFCF8",
+  "theme_color": "#FDFCF8",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
