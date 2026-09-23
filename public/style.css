@@ -1521,6 +1521,36 @@ body {
     border-color: rgba(194, 90, 78, 0.4);
 }
 
+/* ===== 設定の中の見出し ===== */
+.set-head {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    margin: 18px 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(46, 51, 56, 0.08);
+}
+
+.set-head:first-of-type { margin-top: 6px; }
+.set-head.hidden { display: none; }
+
+.set-btn {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    background: rgba(46, 51, 56, 0.05);
+    border: none;
+    border-radius: 9px;
+    padding: 11px;
+    cursor: pointer;
+}
+
+.set-btn:hover { background: rgba(46, 51, 56, 0.09); }
+
 /* ===== ホスト専用：ノートごと消す ===== */
 .room-delete {
     width: 100%;

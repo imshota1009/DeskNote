@@ -1136,6 +1136,8 @@ function goHome() {
     $('demoBar').classList.add('hidden');
     $('modal').classList.add('hidden');
     $('roomModal').classList.add('hidden');
+    $('settingsModal').classList.add('hidden');
+    $('kindModal').classList.add('hidden');
     $('gateMade').classList.add('hidden');
     $('gateError').textContent = '';
     // 戻ってすぐ開き直せるよう、いま開いていたIDを入れておく
@@ -1169,12 +1171,27 @@ async function copyId(id, btn) {
 $('roomBtn').addEventListener('click', () => {
     $('roomIdText').textContent = prettyId(roomId);
     $('roomModal').classList.remove('hidden');
-    // IDの変更は、ホスト（作った本人）にしかできない
+});
+
+/* ===== 設定 ===== */
+$('settingsBtn').addEventListener('click', () => {
+    // IDの変更とノートの削除は、ホスト（作った本人）にしかできない
     const iAmHost = !!hostId && viewerId === hostId;
+    $('hostHead').classList.toggle('hidden', !iAmHost);
     $('roomRotate').classList.toggle('hidden', !iAmHost);
     $('rotateNote').classList.toggle('hidden', !iAmHost);
     $('roomDelete').classList.toggle('hidden', !iAmHost);
     $('deleteNote').classList.toggle('hidden', !iAmHost);
+    $('deleteNote').textContent = '中身も、参加している人の画面からも消えます。元には戻せません。';
+    $('settingsModal').classList.remove('hidden');
+});
+$('settingsClose').addEventListener('click', () => $('settingsModal').classList.add('hidden'));
+$('settingsModal').addEventListener('click', e => {
+    if (e.target === $('settingsModal')) $('settingsModal').classList.add('hidden');
+});
+$('setKinds').addEventListener('click', () => {
+    $('settingsModal').classList.add('hidden');
+    openKindModal();
 });
 
 /* ホストだけができる、ノートごとの削除。
@@ -1187,14 +1204,14 @@ $('roomDelete').addEventListener('click', () => {
         'ノート「' + label + '」',
         n ? '予定とやること 合わせて ' + n + ' 件も消えます。' : '',
         async () => {
-            $('roomModal').classList.add('hidden');
+            $('settingsModal').classList.add('hidden');
             const id = roomId;
             if (unsubscribe) { unsubscribe(); unsubscribe = null; }
             try {
                 await deleteDoc(doc(db, 'rooms', id));
             } catch {
                 // 消せなかったときは、開いたままにして知らせる
-                $('roomModal').classList.remove('hidden');
+                $('settingsModal').classList.remove('hidden');
                 $('deleteNote').textContent = '通信できませんでした。電波のあるところでもう一度お試しください。';
                 return;
             }
@@ -1262,6 +1279,7 @@ $('roomRotate').addEventListener('click', async () => {
 
         await openRoom(newId, false);
         $('roomIdText').textContent = prettyId(newId);
+        $('settingsModal').classList.add('hidden');
         btn.textContent = '変更しました';
     } catch {
         btn.textContent = '変更できませんでした';

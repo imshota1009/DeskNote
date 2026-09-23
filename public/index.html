@@ -102,6 +102,7 @@
                         <p class="date" id="date">　</p>
                         <button class="head-btn" id="homeBtn" title="入口に戻る">ホーム</button>
                         <button class="head-btn" id="roomBtn" title="ノートIDを表示">ID</button>
+                        <button class="head-btn" id="settingsBtn" title="このノートの設定">設定</button>
                         <button class="head-btn" id="skyBtn" title="天気の演出を切り替える">天気</button>
                         <select class="weather-pick hidden" id="weatherPick" title="お試し用に天気を変える">
                             <option value="sun">晴れ</option>
@@ -233,13 +234,31 @@
             <p class="gate-made-id" id="roomIdText"></p>
             <button class="gate-copy" id="roomCopy">IDをコピー</button>
             <p class="gate-note">別の端末でこのIDを入れると、同じノートが開きます。人に見せないでください。</p>
+        </div>
+    </div>
+
+    <!-- このノートの設定。消す操作もここにまとめてある -->
+    <div class="sheet-modal hidden" id="settingsModal">
+        <div class="modal-paper modal-narrow">
+            <div class="modal-head">
+                <h3 class="modal-title">設定</h3>
+                <button class="modal-close" id="settingsClose" aria-label="閉じる"><i class="ico-close"></i></button>
+            </div>
+
+            <h4 class="set-head">このノート</h4>
+            <button class="set-btn" id="setKinds">種別を編集する</button>
+            <p class="gate-note">予定に付ける種別を、増やしたり消したりできます。</p>
+
             <button class="room-reset" id="presenceReset">「参加中」の表示をリセット</button>
             <p class="gate-note">実際にはいないはずの人数が出ているときに押してください。</p>
 
+            <h4 class="set-head set-head-host hidden" id="hostHead">ホストだけができること</h4>
             <button class="room-rotate hidden" id="roomRotate">ノートIDを変更する</button>
             <p class="gate-note gate-note-host hidden" id="rotateNote">今のIDを知っている人（キックした相手も含む）は、変更後アクセスできなくなります。新しいIDは、また信頼できる人にだけ伝えてください。</p>
 
+            <h4 class="set-head">この端末から消す</h4>
             <button class="room-leave" id="roomLeave">このノートを閉じる（IDを忘れる）</button>
+            <p class="gate-note">ノート自体は残ります。IDを入れれば、また開けます。</p>
 
             <button class="room-delete hidden" id="roomDelete">このノートを削除する</button>
             <p class="gate-note gate-note-host hidden" id="deleteNote">中身も、参加している人の画面からも消えます。元には戻せません。</p>
