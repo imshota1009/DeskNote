@@ -30,7 +30,8 @@
 *   **4つの見方** — 「あした」「これから」「これまで」「カレンダー」をタブで切り替え
 *   **共有** — ノートIDを伝えるだけで、同じノートを全員が同時に編集できます
 *   **参加者の顔** — 端末ごとに顔（絵文字）が割り当てられ、いま誰が見ているかが分かります
-*   **ホストの操作** — ノートを作った人だけが、名前を付ける・IDを変える・参加者を退出させる・ノートごと削除する、ができます
+*   **設定** — 種別の編集、「参加中」の表示のリセット、ノートを閉じる／削除する、をまとめた画面
+*   **ホストの操作** — ノートを作った人だけが、名前を付ける・IDを変える・参加者を退出させる・設定からノートごと削除する、ができます
 *   **オフライン対応** — 電波がなくても書けて、つながったときにまとめて送られます
 *   **デモ** — ノートを作る前に、サンプルの予定で中身を試せます
 
@@ -94,7 +95,8 @@ It is built for leaving open all day on an old tablet propped up on your desk.
 *   **Four views** — Tomorrow, Upcoming, Past and Calendar
 *   **Sharing** — Anyone with the note ID edits the same note in real time
 *   **Faces** — Each device gets its own emoji face, so you can see who is looking
-*   **Host controls** — Whoever created the note can rename it, rotate its ID, remove viewers, and delete the note entirely
+*   **Settings** — One sheet for editing categories, resetting the presence list, and leaving or deleting the note
+*   **Host controls** — Whoever created the note can rename it, rotate its ID, remove viewers, and delete the note entirely from settings
 *   **Offline first** — Write without a connection; changes sync once you are back online
 *   **Demo mode** — Try the app with sample data before creating a note
 
