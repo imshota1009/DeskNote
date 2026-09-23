@@ -59,7 +59,6 @@ let roomName = '';      // ホストが付けた、ノートの正式な名前
 let bannedViewers = []; // ホストに退出させられた人の一覧
 let kinds = [];         // このノートで選べる種別
 let retired = {};       // 消した種別。昔の予定の見た目を保つために名前だけ残す
-let editingKinds = false;
 
 const $ = id => document.getElementById(id);
 
@@ -98,23 +97,19 @@ function saveKinds() {
         .catch(() => { /* 次に開いたときにもう一度送られる */ });
 }
 
+// 予定を書く画面に並ぶのは「選ぶ」ためのボタンだけ。
+// 増やす・減らすは、まぎらわしくないよう別の画面に分けている
 function renderKindPick() {
     const box = $('kindPick');
     if (!box) return;
     box.innerHTML = '';
-    box.classList.toggle('is-editing', editingKinds);
 
     for (const k of kinds) {
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'kpick kc' + k.c + (k.id === pickedKind ? ' is-on' : '');
         b.dataset.kind = k.id;
-        b.appendChild(document.createTextNode(k.label));
-        const x = document.createElement('span');
-        x.className = 'kpick-x';
-        x.dataset.del = k.id;
-        x.setAttribute('aria-label', k.label + 'を消す');
-        b.appendChild(x);
+        b.textContent = k.label;
         box.appendChild(b);
     }
 
@@ -125,42 +120,84 @@ function renderKindPick() {
     none.textContent = 'なし';
     box.appendChild(none);
 
-    if (kinds.length < KIND_MAX) {
-        const add = document.createElement('button');
-        add.type = 'button';
-        add.className = 'kpick kpick-add';
-        add.dataset.act = 'add';
-        add.textContent = '＋ 種別を追加';
-        box.appendChild(add);
-    }
-    if (kinds.length) {
-        const ed = document.createElement('button');
-        ed.type = 'button';
-        ed.className = 'kpick kpick-edit' + (editingKinds ? ' is-on' : '');
-        ed.dataset.act = 'edit';
-        ed.textContent = editingKinds ? '終わる' : '整理';
-        box.appendChild(ed);
-    }
+    const ed = document.createElement('button');
+    ed.type = 'button';
+    ed.className = 'kpick kpick-edit';
+    ed.dataset.act = 'edit';
+    ed.textContent = '種別を編集';
+    box.appendChild(ed);
 }
 
-function openKindAdd() {
-    $('kindAdd').classList.remove('hidden');
+/* ===== 種別を編集する画面 ===== */
+function openKindModal() {
+    renderKindList();
     $('kindName').value = '';
-    $('kindName').focus();
+    $('kindModal').classList.remove('hidden');
 }
 
-function closeKindAdd() {
-    $('kindAdd').classList.add('hidden');
+function closeKindModal() {
+    $('kindModal').classList.add('hidden');
+}
+
+function renderKindList() {
+    const list = $('kindList');
+    list.innerHTML = '';
+
+    for (const k of kinds) {
+        const li = document.createElement('li');
+        li.className = 'kind-row';
+
+        const dot = document.createElement('span');
+        dot.className = 'kind-row-dot kc' + k.c;
+        li.appendChild(dot);
+
+        const name = document.createElement('span');
+        name.className = 'kind-row-name';
+        name.textContent = k.label;
+        li.appendChild(name);
+
+        const used = data.plans.filter(p => p.kind === k.id).length;
+        const n = document.createElement('span');
+        n.className = 'kind-row-n';
+        n.textContent = used ? used + '件' : '';
+        li.appendChild(n);
+
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'kind-row-del';
+        del.dataset.del = k.id;
+        del.textContent = '削除';
+        li.appendChild(del);
+
+        list.appendChild(li);
+    }
+
+    if (!kinds.length) {
+        const li = document.createElement('li');
+        li.className = 'kind-empty';
+        li.textContent = 'まだ種別がありません。下から追加できます。';
+        list.appendChild(li);
+    }
+
+    $('kindName').disabled = kinds.length >= KIND_MAX;
+    $('kindAddOk').disabled = kinds.length >= KIND_MAX;
+    $('kindNote').textContent = kinds.length >= KIND_MAX
+        ? '種別はこれ以上増やせません（' + KIND_MAX + '個まで）。'
+        : '種別はこのノートを見ている全員に共有されます。';
 }
 
 function addKind() {
     const label = $('kindName').value.trim().slice(0, KIND_NAME_MAX);
     if (!label) { $('kindName').focus(); return; }
-    if (kinds.some(k => k.label === label)) { closeKindAdd(); return; }
+    if (kinds.length >= KIND_MAX) return;
+    if (kinds.some(k => k.label === label)) { $('kindName').value = ''; return; }
+
     const k = { id: newKindId(), label, c: nextKindColor() };
     kinds.push(k);
     pickedKind = k.id;
-    closeKindAdd();
+    $('kindName').value = '';
+    $('kindName').focus();
+    renderKindList();
     renderKindPick();
     saveKinds();
 }
@@ -171,12 +208,13 @@ function removeKind(id) {
     const inUse = data.plans.filter(p => p.kind === id).length;
     askDelete(
         '種別「' + k.label + '」',
-        inUse ? 'この種別を付けた予定 ' + inUse + ' 件はそのまま残ります。' : '',
+        inUse ? 'この種別を付けた予定 ' + inUse + ' 件は、見た目そのままで残ります。' : '',
         () => {
             kinds = kinds.filter(x => x.id !== id);
             // 昔の予定の見た目が変わらないよう、名前と色だけ残しておく
             if (inUse) retired[id] = { id: k.id, label: k.label, c: k.c };
             if (pickedKind === id) pickedKind = '';
+            renderKindList();
             renderKindPick();
             renderAll();
             saveKinds();
@@ -992,7 +1030,6 @@ function openDemo() {
     data = buildDemo();
     kinds = LEGACY_KINDS.map(k => ({ ...k }));
     retired = {};
-    editingKinds = false;
     renderKindPick();
     $('gate').classList.add('hidden');
     $('page').classList.remove('hidden');
@@ -1012,7 +1049,6 @@ function goHome() {
     data = { plans: [], todos: [] };
     kinds = [];
     retired = {};
-    editingKinds = false;
     $('page').classList.add('hidden');
     $('demoBar').classList.add('hidden');
     $('modal').classList.add('hidden');
@@ -1054,6 +1090,36 @@ $('roomBtn').addEventListener('click', () => {
     const iAmHost = !!hostId && viewerId === hostId;
     $('roomRotate').classList.toggle('hidden', !iAmHost);
     $('rotateNote').classList.toggle('hidden', !iAmHost);
+    $('roomDelete').classList.toggle('hidden', !iAmHost);
+    $('deleteNote').classList.toggle('hidden', !iAmHost);
+});
+
+/* ホストだけができる、ノートごとの削除。
+   参加している人の画面からも消えるので、消す前に必ず一度止める。 */
+$('roomDelete').addEventListener('click', () => {
+    if (!roomId || viewerId !== hostId) return;
+    const label = roomName || prettyId(roomId);
+    const n = data.plans.length + data.todos.length;
+    askDelete(
+        'ノート「' + label + '」',
+        n ? '予定とやること 合わせて ' + n + ' 件も消えます。' : '',
+        async () => {
+            $('roomModal').classList.add('hidden');
+            const id = roomId;
+            if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+            try {
+                await deleteDoc(doc(db, 'rooms', id));
+            } catch {
+                // 消せなかったときは、開いたままにして知らせる
+                $('roomModal').classList.remove('hidden');
+                $('deleteNote').textContent = '通信できませんでした。電波のあるところでもう一度お試しください。';
+                return;
+            }
+            forgetNote(id);
+            localStorage.removeItem(ROOM_KEY);
+            location.reload();
+        }
+    );
 });
 $('roomClose').addEventListener('click', () => $('roomModal').classList.add('hidden'));
 $('roomCopy').addEventListener('click', () => copyId(roomId, $('roomCopy')));
@@ -1099,7 +1165,7 @@ $('roomRotate').addEventListener('click', async () => {
     const newId = newRoomId();
     try {
         await setDoc(doc(db, 'rooms', newId), {
-            plans: data.plans, todos: data.todos,
+            plans: data.plans, todos: data.todos, kinds, retired,
             name: roomName, hostId: viewerId, bannedViewers: [],
             members: { [viewerId]: { lastSeen: Date.now() } }
         });
@@ -1129,8 +1195,7 @@ function openModal(kind) {
     $('fTime').value = '';
     $('fEnd').value = '';
     pickedKind = kinds.length ? kinds[0].id : '';
-    editingKinds = false;
-    closeKindAdd();
+    closeKindModal();
     for (const b of document.querySelectorAll('.mkind')) b.classList.toggle('is-on', b.dataset.form === kind);
     renderKindPick();
     $('modalKinds').classList.remove('hidden');
@@ -1167,8 +1232,7 @@ function openEdit(id) {
         $('fEnd').value = '';
         pickedKind = '';
     }
-    editingKinds = false;
-    closeKindAdd();
+    closeKindModal();
     renderKindPick();
 
     $('modalSave').textContent = '直す';
@@ -1199,31 +1263,25 @@ $('modalKinds').addEventListener('click', e => {
     applyFormKind();
 });
 $('kindPick').addEventListener('click', e => {
-    const x = e.target.closest('.kpick-x');
-    if (x) { removeKind(x.dataset.del); return; }
-
     const b = e.target.closest('.kpick');
     if (!b) return;
-
-    if (b.dataset.act === 'add') { openKindAdd(); return; }
-    if (b.dataset.act === 'edit') {
-        editingKinds = !editingKinds;
-        closeKindAdd();
-        renderKindPick();
-        return;
-    }
-    if (editingKinds) return;   // 整理中は選び直さない
-
+    if (b.dataset.act === 'edit') { openKindModal(); return; }
     pickedKind = b.dataset.kind;
     renderKindPick();
 });
 
+$('kindList').addEventListener('click', e => {
+    const b = e.target.closest('.kind-row-del');
+    if (b) removeKind(b.dataset.del);
+});
 $('kindAddOk').addEventListener('click', addKind);
-$('kindAddCancel').addEventListener('click', closeKindAdd);
-// フォームの中なので、Enterで登録が走ってしまわないようにする
+$('kindModalClose').addEventListener('click', closeKindModal);
+$('kindModal').addEventListener('click', e => {
+    if (e.target === $('kindModal')) closeKindModal();
+});
 $('kindName').addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); addKind(); }
-    if (e.key === 'Escape') { e.preventDefault(); closeKindAdd(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeKindModal(); }
 });
 $('modalClose').addEventListener('click', () => $('modal').classList.add('hidden'));
 $('modal').addEventListener('click', e => {

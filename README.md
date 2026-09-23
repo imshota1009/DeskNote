@@ -24,12 +24,12 @@
 ## ✨ できること
 
 *   **予定の記録** — 日付・時刻・場所・内容を、色分けされた種別付きで登録
-*   **種別は自由** — 最初は「仕事・学校・おでかけ・病院」。自分で追加でき、いらなくなったものは消せます
+*   **種別は自由** — 最初は「仕事・学校・おでかけ・病院」。「種別を編集」から追加・削除できます（消しても、その種別を付けた予定の見た目は変わりません）
 *   **やることリスト** — 期限付きのToDo。終わったものはまとめて隠れます
 *   **4つの見方** — 「あした」「これから」「これまで」「カレンダー」をタブで切り替え
 *   **共有** — ノートIDを伝えるだけで、同じノートを全員が同時に編集できます
 *   **参加者の顔** — 端末ごとに顔（絵文字）が割り当てられ、いま誰が見ているかが分かります
-*   **ホストの操作** — ノートを作った人だけが、ノートに名前を付けたり、参加者を退出させたりできます
+*   **ホストの操作** — ノートを作った人だけが、名前を付ける・IDを変える・参加者を退出させる・ノートごと削除する、ができます
 *   **オフライン対応** — 電波がなくても書けて、つながったときにまとめて送られます
 *   **デモ** — ノートを作る前に、サンプルの予定で中身を試せます
 
@@ -87,12 +87,12 @@ It is built for leaving open all day on an old tablet propped up on your desk.
 ## ✨ Features
 
 *   **Schedule** — Date, time, place and details, colour-coded by category
-*   **Your own categories** — Starts with Work, School, Outing and Hospital; add your own and delete the ones you do not need
+*   **Your own categories** — Starts with Work, School, Outing and Hospital; add and remove them from the category editor (removing one leaves existing plans looking exactly as they were)
 *   **To-do list** — Tasks with deadlines; finished ones fold away
 *   **Four views** — Tomorrow, Upcoming, Past and Calendar
 *   **Sharing** — Anyone with the note ID edits the same note in real time
 *   **Faces** — Each device gets its own emoji face, so you can see who is looking
-*   **Host controls** — Whoever created the note can rename it and remove viewers
+*   **Host controls** — Whoever created the note can rename it, rotate its ID, remove viewers, and delete the note entirely
 *   **Offline first** — Write without a connection; changes sync once you are back online
 *   **Demo mode** — Try the app with sample data before creating a note
 

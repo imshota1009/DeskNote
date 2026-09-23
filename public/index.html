@@ -191,7 +191,7 @@
             </div>
 
             <form id="entryForm" autocomplete="off">
-                <label class="f-row"><span class="f-label">場所・相手</span>
+                <label class="f-row"><span class="f-label">場所</span>
                     <input type="text" id="fCompany" maxlength="40" placeholder="（任意）">
                 </label>
 
@@ -208,11 +208,6 @@
 
                 <div class="f-row f-kinds" id="rowKind"><span class="f-label">種別</span>
                     <div class="kind-pick" id="kindPick"></div>
-                    <div class="kind-add hidden" id="kindAdd">
-                        <input type="text" id="kindName" maxlength="8" placeholder="例：バイト・ジム・会議">
-                        <button type="button" class="kind-add-ok" id="kindAddOk">追加</button>
-                        <button type="button" class="kind-add-cancel" id="kindAddCancel">やめる</button>
-                    </div>
                 </div>
 
                 <button type="submit" class="modal-save" id="modalSave">登録する</button>
@@ -237,6 +232,25 @@
             <p class="gate-note gate-note-host hidden" id="rotateNote">今のIDを知っている人（キックした相手も含む）は、変更後アクセスできなくなります。新しいIDは、また信頼できる人にだけ伝えてください。</p>
 
             <button class="room-leave" id="roomLeave">このノートを閉じる（IDを忘れる）</button>
+
+            <button class="room-delete hidden" id="roomDelete">このノートを削除する</button>
+            <p class="gate-note gate-note-host hidden" id="deleteNote">中身も、参加している人の画面からも消えます。元には戻せません。</p>
+        </div>
+    </div>
+
+    <!-- 種別の編集。選ぶ操作と、増やす・減らす操作を分けている -->
+    <div class="sheet-modal hidden" id="kindModal">
+        <div class="modal-paper modal-narrow">
+            <div class="modal-head">
+                <h3 class="modal-title">種別を編集</h3>
+                <button class="modal-close" id="kindModalClose" aria-label="閉じる"><i class="ico-close"></i></button>
+            </div>
+            <ul class="kind-list" id="kindList"></ul>
+            <div class="kind-new">
+                <input type="text" id="kindName" maxlength="8" placeholder="例：バイト・ジム・通院">
+                <button type="button" class="kind-new-ok" id="kindAddOk">追加する</button>
+            </div>
+            <p class="gate-note" id="kindNote">種別はこのノートを見ている全員に共有されます。</p>
         </div>
     </div>
 

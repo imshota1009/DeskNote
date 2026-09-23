@@ -363,6 +363,15 @@ body {
 .cal-dot.kc6 { background: #8A6A4F; }
 .cal-dot.kc7 { background: #5A6470; }
 
+.kind-row-dot.kc0 { background: #6B5BA8; }
+.kind-row-dot.kc1 { background: #B5722B; }
+.kind-row-dot.kc2 { background: #2F6EA8; }
+.kind-row-dot.kc3 { background: #3F7F5B; }
+.kind-row-dot.kc4 { background: #A8567F; }
+.kind-row-dot.kc5 { background: #2E7F84; }
+.kind-row-dot.kc6 { background: #8A6A4F; }
+.kind-row-dot.kc7 { background: #5A6470; }
+
 .kpick.kc0::before { background: #6B5BA8; }
 .kpick.kc1::before { background: #B5722B; }
 .kpick.kc2::before { background: #2F6EA8; }
@@ -1297,89 +1306,109 @@ body {
 }
 
 .kpick.is-on::before { background: rgba(255, 255, 255, 0.85); }
-.kpick-none::before, .kpick-add::before, .kpick-edit::before { display: none; }
+.kpick-none::before, .kpick-edit::before { display: none; }
 
-.kpick-add, .kpick-edit {
+/* 「種別を編集」は、選ぶボタンと見た目をはっきり分ける */
+.kpick-edit {
     color: var(--ink-soft);
     background: transparent;
-    border: 1px dashed rgba(46, 51, 56, 0.22);
+    border: 1px dashed rgba(46, 51, 56, 0.28);
 }
 
-.kpick-edit.is-on {
-    color: #fff;
-    background: var(--ink-soft);
-    border-style: solid;
+.kpick-edit:hover {
+    color: var(--ink);
+    border-color: rgba(46, 51, 56, 0.45);
 }
 
-/* ✕は「整理」を押している間だけ出す。ふだんの選択で押し間違えないように */
-.kpick-x { display: none; }
+/* ===== 種別を編集する画面 ===== */
+.kind-list {
+    list-style: none;
+    margin: 0 0 14px;
+    padding: 0;
+}
 
-.kind-pick.is-editing .kpick-x {
-    display: inline-block;
-    position: relative;
-    width: 14px;
-    height: 14px;
-    margin-left: 6px;
-    vertical-align: -2px;
+.kind-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 2px;
+    border-bottom: 1px solid rgba(46, 51, 56, 0.08);
+}
+
+.kind-row-dot {
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: rgba(46, 51, 56, 0.12);
+    flex-shrink: 0;
+    background: var(--ink-faint);
 }
 
-.kind-pick.is-editing .kpick-x::before,
-.kind-pick.is-editing .kpick-x::after {
-    content: '';
-    position: absolute;
-    left: 3px;
-    top: 6.5px;
-    width: 8px;
-    height: 1.5px;
-    border-radius: 1px;
-    background: var(--ink-soft);
+.kind-row-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    color: var(--ink);
 }
 
-.kind-pick.is-editing .kpick-x::before { transform: rotate(45deg); }
-.kind-pick.is-editing .kpick-x::after { transform: rotate(-45deg); }
+.kind-row-n {
+    font-size: 12px;
+    color: var(--ink-faint);
+}
 
-.kind-add {
+.kind-row-del {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--overdue);
+    background: rgba(194, 90, 78, 0.08);
+    border: 1px solid rgba(194, 90, 78, 0.28);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.kind-row-del:hover { background: rgba(194, 90, 78, 0.16); }
+
+.kind-empty {
+    padding: 14px 2px;
+    font-size: 13px;
+    color: var(--ink-faint);
+}
+
+.kind-new {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 8px;
-    flex-wrap: wrap;
 }
 
-.kind-add.hidden { display: none; }
-
-.kind-add input {
+.kind-new input {
     flex: 1;
-    min-width: 120px;
+    min-width: 0;
     font-family: var(--font-body);
-    font-size: 14px;
+    font-size: 15px;
     color: var(--ink);
     background: rgba(46, 51, 56, 0.05);
     border: none;
     border-radius: 10px;
-    padding: 8px 12px;
+    padding: 10px 12px;
 }
 
-.kind-add-ok, .kind-add-cancel {
+.kind-new-ok {
     font-family: var(--font-body);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
-    border: none;
-    border-radius: 20px;
-    padding: 8px 14px;
-    cursor: pointer;
-}
-
-.kind-add-ok {
     color: #fff;
     background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
-.kind-add-cancel {
-    color: var(--ink-soft);
-    background: rgba(46, 51, 56, 0.06);
+.kind-new-ok:disabled, .kind-new input:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
 .modal-save {
@@ -1441,6 +1470,25 @@ body {
     color: var(--overdue);
     border-color: rgba(194, 90, 78, 0.4);
 }
+
+/* ===== ホスト専用：ノートごと消す ===== */
+.room-delete {
+    width: 100%;
+    margin-top: 14px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--overdue);
+    border: none;
+    border-radius: 9px;
+    padding: 11px;
+    cursor: pointer;
+}
+
+.room-delete:hover { filter: brightness(0.94); }
+
+.room-delete.hidden { display: none; }
 
 .page.hidden {
     display: none;
