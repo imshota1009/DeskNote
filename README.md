@@ -5,10 +5,10 @@
 <details>
 <summary>🇯🇵 日本語のドキュメントを表示 (Click to expand)</summary>
 
-# 📝 今日のノート 🗓️ 就活の予定を、みんなで1枚の紙に
+# 📝 今日のノート 🗓️ 予定とやることを、みんなで1枚の紙に
 
-セミナー・インターン・選考の予定と、やることリストを、1画面にまとめて置いておくためのノートです。
-ノートIDを教えるだけで、友だちや同じ就活仲間と同じノートを共有できます。ログインは要りません。
+予定とやることリストを、1画面にまとめて置いておくためのノートです。仕事・学校・おでかけ・病院など、種別は自分で決められます。
+ノートIDを教えるだけで、家族や友だちと同じノートを共有できます。ログインは要りません。
 
 古いタブレットやスマホを机に立てかけ、いつも開いたままにしておく使い方を想定しています。
 
@@ -23,7 +23,8 @@
 
 ## ✨ できること
 
-*   **予定の記録** — 日付・時刻・企業名・内容を、セミナー / インターン / 選考の3種類で色分けして登録
+*   **予定の記録** — 日付・時刻・場所・内容を、色分けされた種別付きで登録
+*   **種別は自由** — 最初は「仕事・学校・おでかけ・病院」。自分で追加でき、いらなくなったものは消せます
 *   **やることリスト** — 期限付きのToDo。終わったものはまとめて隠れます
 *   **4つの見方** — 「あした」「これから」「これまで」「カレンダー」をタブで切り替え
 *   **共有** — ノートIDを伝えるだけで、同じノートを全員が同時に編集できます
@@ -69,9 +70,9 @@ Firestore は公開中のプロジェクトにつながるので、自分の環�
 <details>
 <summary>🇺🇸 Show English Document (Click to expand)</summary>
 
-# 📝 DeskNote 🗓️ One Shared Sheet for Your Job Hunt
+# 📝 DeskNote 🗓️ One Shared Sheet for Everything Coming Up
 
-DeskNote keeps your seminars, internships and interviews — plus your to-do list — on a single screen.
+DeskNote keeps your plans and to-dos on a single screen. Work, school, outings, appointments — you decide the categories.
 Share the note ID and everyone edits the same page. No accounts, no sign-in.
 
 It is built for leaving open all day on an old tablet propped up on your desk.
@@ -85,7 +86,8 @@ It is built for leaving open all day on an old tablet propped up on your desk.
 
 ## ✨ Features
 
-*   **Schedule** — Date, time, company and details, colour-coded as Seminar / Internship / Selection
+*   **Schedule** — Date, time, place and details, colour-coded by category
+*   **Your own categories** — Starts with Work, School, Outing and Hospital; add your own and delete the ones you do not need
 *   **To-do list** — Tasks with deadlines; finished ones fold away
 *   **Four views** — Tomorrow, Upcoming, Past and Calendar
 *   **Sharing** — Anyone with the note ID edits the same note in real time

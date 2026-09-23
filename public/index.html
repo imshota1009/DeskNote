@@ -62,7 +62,7 @@
                 <button class="gate-copy" id="gateCopy">IDをコピー</button>
                 <label class="gate-made-name-row">
                     <span>呼び名（自分だけに表示されます）</span>
-                    <input type="text" id="gateMadeLabel" maxlength="20" placeholder="例：就活ノート">
+                    <input type="text" id="gateMadeLabel" maxlength="20" placeholder="例：家族のノート・就活ノート">
                 </label>
                 <p class="gate-note">IDを知っている人は中身を見られます。人に見せないでください。</p>
                 <button class="gate-btn" id="gateGo">このノートを開く</button>
@@ -191,12 +191,12 @@
             </div>
 
             <form id="entryForm" autocomplete="off">
-                <label class="f-row"><span class="f-label">会社名</span>
+                <label class="f-row"><span class="f-label">場所・相手</span>
                     <input type="text" id="fCompany" maxlength="40" placeholder="（任意）">
                 </label>
 
                 <label class="f-row"><span class="f-label">内容</span>
-                    <input type="text" id="fTitle" maxlength="80" placeholder="セミナー名・やることなど" required>
+                    <input type="text" id="fTitle" maxlength="80" placeholder="予定の名前・やること" required>
                 </label>
 
                 <div class="f-row f-when" id="rowDate"><span class="f-label" id="labelDate">日付</span>
@@ -207,11 +207,11 @@
                 </div>
 
                 <div class="f-row f-kinds" id="rowKind"><span class="f-label">種別</span>
-                    <div class="kind-pick" id="kindPick">
-                        <button type="button" class="kpick is-on" data-kind="seminar">セミナー</button>
-                        <button type="button" class="kpick" data-kind="intern">インターン</button>
-                        <button type="button" class="kpick" data-kind="selection">選考</button>
-                        <button type="button" class="kpick" data-kind="">なし</button>
+                    <div class="kind-pick" id="kindPick"></div>
+                    <div class="kind-add hidden" id="kindAdd">
+                        <input type="text" id="kindName" maxlength="8" placeholder="例：バイト・ジム・会議">
+                        <button type="button" class="kind-add-ok" id="kindAddOk">追加</button>
+                        <button type="button" class="kind-add-cancel" id="kindAddCancel">やめる</button>
                     </div>
                 </div>
 

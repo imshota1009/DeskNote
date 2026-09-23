@@ -313,20 +313,64 @@ body {
     letter-spacing: 0.03em;
 }
 
-.tag-seminar {
+/* 種別の色。自分で増やした種別にも、この中から順に割り当てる */
+.tag.kc0 {
     color: #6B5BA8;
     background: rgba(107, 91, 168, 0.13);
 }
 
-.tag-intern {
+.tag.kc1 {
     color: #B5722B;
-    background: rgba(181, 114, 43, 0.14);
+    background: rgba(181, 114, 43, 0.13);
 }
 
-.tag-selection {
+.tag.kc2 {
     color: #2F6EA8;
     background: rgba(47, 110, 168, 0.13);
 }
+
+.tag.kc3 {
+    color: #3F7F5B;
+    background: rgba(63, 127, 91, 0.13);
+}
+
+.tag.kc4 {
+    color: #A8567F;
+    background: rgba(168, 86, 127, 0.13);
+}
+
+.tag.kc5 {
+    color: #2E7F84;
+    background: rgba(46, 127, 132, 0.13);
+}
+
+.tag.kc6 {
+    color: #8A6A4F;
+    background: rgba(138, 106, 79, 0.13);
+}
+
+.tag.kc7 {
+    color: #5A6470;
+    background: rgba(90, 100, 112, 0.13);
+}
+
+.cal-dot.kc0 { background: #6B5BA8; }
+.cal-dot.kc1 { background: #B5722B; }
+.cal-dot.kc2 { background: #2F6EA8; }
+.cal-dot.kc3 { background: #3F7F5B; }
+.cal-dot.kc4 { background: #A8567F; }
+.cal-dot.kc5 { background: #2E7F84; }
+.cal-dot.kc6 { background: #8A6A4F; }
+.cal-dot.kc7 { background: #5A6470; }
+
+.kpick.kc0::before { background: #6B5BA8; }
+.kpick.kc1::before { background: #B5722B; }
+.kpick.kc2::before { background: #2F6EA8; }
+.kpick.kc3::before { background: #3F7F5B; }
+.kpick.kc4::before { background: #A8567F; }
+.kpick.kc5::before { background: #2E7F84; }
+.kpick.kc6::before { background: #8A6A4F; }
+.kpick.kc7::before { background: #5A6470; }
 
 .item-text {
     flex: 1;
@@ -1240,6 +1284,104 @@ body {
     color: #fff;
 }
 
+/* 種別の名前の左に、その種別の色を小さく置く */
+.kpick::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: 1px;
+    background: var(--ink-faint);
+}
+
+.kpick.is-on::before { background: rgba(255, 255, 255, 0.85); }
+.kpick-none::before, .kpick-add::before, .kpick-edit::before { display: none; }
+
+.kpick-add, .kpick-edit {
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px dashed rgba(46, 51, 56, 0.22);
+}
+
+.kpick-edit.is-on {
+    color: #fff;
+    background: var(--ink-soft);
+    border-style: solid;
+}
+
+/* ✕は「整理」を押している間だけ出す。ふだんの選択で押し間違えないように */
+.kpick-x { display: none; }
+
+.kind-pick.is-editing .kpick-x {
+    display: inline-block;
+    position: relative;
+    width: 14px;
+    height: 14px;
+    margin-left: 6px;
+    vertical-align: -2px;
+    border-radius: 50%;
+    background: rgba(46, 51, 56, 0.12);
+}
+
+.kind-pick.is-editing .kpick-x::before,
+.kind-pick.is-editing .kpick-x::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 6.5px;
+    width: 8px;
+    height: 1.5px;
+    border-radius: 1px;
+    background: var(--ink-soft);
+}
+
+.kind-pick.is-editing .kpick-x::before { transform: rotate(45deg); }
+.kind-pick.is-editing .kpick-x::after { transform: rotate(-45deg); }
+
+.kind-add {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.kind-add.hidden { display: none; }
+
+.kind-add input {
+    flex: 1;
+    min-width: 120px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--ink);
+    background: rgba(46, 51, 56, 0.05);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+.kind-add-ok, .kind-add-cancel {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+.kind-add-ok {
+    color: #fff;
+    background: var(--accent);
+}
+
+.kind-add-cancel {
+    color: var(--ink-soft);
+    background: rgba(46, 51, 56, 0.06);
+}
+
 .modal-save {
     width: 100%;
     font-family: var(--font-body);
@@ -1980,13 +2122,7 @@ body {
     background: var(--accent);
 }
 
-.cal-dot.k-intern {
-    background: var(--today);
-}
 
-.cal-dot.k-selection {
-    background: var(--overdue);
-}
 
 .cal-dot.k-more {
     width: 3px;

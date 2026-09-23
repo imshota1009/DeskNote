@@ -23,7 +23,24 @@ try {
 
 const ROOM_KEY = 'desknote.room';
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
-const KIND_LABEL = { seminar: 'セミナー', intern: 'インターン', selection: '選考' };
+// 新しいノートに最初から入っている種別。仕事でも学校でも使えるものにしてある
+const DEFAULT_KINDS = [
+    { id: 'work', label: '仕事', c: 3 },
+    { id: 'school', label: '学校', c: 2 },
+    { id: 'outing', label: 'おでかけ', c: 4 },
+    { id: 'hospital', label: '病院', c: 5 }
+];
+
+// 就活用に使われていた昔の種別。既に書かれた予定が表示できなくならないよう残す
+const LEGACY_KINDS = [
+    { id: 'seminar', label: 'セミナー', c: 0 },
+    { id: 'intern', label: 'インターン', c: 1 },
+    { id: 'selection', label: '選考', c: 2 }
+];
+
+const KIND_COLORS = 8;      // style.css に用意してある色の数
+const KIND_MAX = 10;        // 一行に収まる範囲
+const KIND_NAME_MAX = 8;
 
 let roomId = localStorage.getItem(ROOM_KEY) || '';
 let data = { plans: [], todos: [] };
@@ -40,8 +57,132 @@ let saving = false;
 let hostId = '';        // 作った人の見る人ID。これと同じ人だけが「ホスト」
 let roomName = '';      // ホストが付けた、ノートの正式な名前
 let bannedViewers = []; // ホストに退出させられた人の一覧
+let kinds = [];         // このノートで選べる種別
+let retired = {};       // 消した種別。昔の予定の見た目を保つために名前だけ残す
+let editingKinds = false;
 
 const $ = id => document.getElementById(id);
+
+/* ===== 種別 ===== */
+// 種別を持っていない古いノートのための既定値。
+// 就活の予定が入っているノートは、これまでどおりの3つをそのまま使う
+function defaultKindsFor(plans) {
+    const legacy = LEGACY_KINDS.map(k => k.id);
+    const used = (plans || []).some(p => legacy.includes(p.kind));
+    return (used ? LEGACY_KINDS : DEFAULT_KINDS).map(k => ({ ...k }));
+}
+
+function kindInfo(id) {
+    if (!id) return null;
+    return kinds.find(k => k.id === id)
+        || LEGACY_KINDS.find(k => k.id === id)
+        || retired[id]
+        || null;
+}
+
+// いちばん使われていない色を選ぶ。似た色が並ばないようにするため
+function nextKindColor() {
+    const used = kinds.map(k => k.c);
+    for (let i = 0; i < KIND_COLORS; i++) if (!used.includes(i)) return i;
+    return kinds.length % KIND_COLORS;
+}
+
+function newKindId() {
+    return 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+}
+
+// 種別の変更は予定とは別に送る。書きかけの予定を巻き込まないため
+function saveKinds() {
+    if (demoMode || !roomId) return;
+    setDoc(doc(db, 'rooms', roomId), { kinds, retired }, { merge: true })
+        .catch(() => { /* 次に開いたときにもう一度送られる */ });
+}
+
+function renderKindPick() {
+    const box = $('kindPick');
+    if (!box) return;
+    box.innerHTML = '';
+    box.classList.toggle('is-editing', editingKinds);
+
+    for (const k of kinds) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'kpick kc' + k.c + (k.id === pickedKind ? ' is-on' : '');
+        b.dataset.kind = k.id;
+        b.appendChild(document.createTextNode(k.label));
+        const x = document.createElement('span');
+        x.className = 'kpick-x';
+        x.dataset.del = k.id;
+        x.setAttribute('aria-label', k.label + 'を消す');
+        b.appendChild(x);
+        box.appendChild(b);
+    }
+
+    const none = document.createElement('button');
+    none.type = 'button';
+    none.className = 'kpick kpick-none' + (pickedKind === '' ? ' is-on' : '');
+    none.dataset.kind = '';
+    none.textContent = 'なし';
+    box.appendChild(none);
+
+    if (kinds.length < KIND_MAX) {
+        const add = document.createElement('button');
+        add.type = 'button';
+        add.className = 'kpick kpick-add';
+        add.dataset.act = 'add';
+        add.textContent = '＋ 種別を追加';
+        box.appendChild(add);
+    }
+    if (kinds.length) {
+        const ed = document.createElement('button');
+        ed.type = 'button';
+        ed.className = 'kpick kpick-edit' + (editingKinds ? ' is-on' : '');
+        ed.dataset.act = 'edit';
+        ed.textContent = editingKinds ? '終わる' : '整理';
+        box.appendChild(ed);
+    }
+}
+
+function openKindAdd() {
+    $('kindAdd').classList.remove('hidden');
+    $('kindName').value = '';
+    $('kindName').focus();
+}
+
+function closeKindAdd() {
+    $('kindAdd').classList.add('hidden');
+}
+
+function addKind() {
+    const label = $('kindName').value.trim().slice(0, KIND_NAME_MAX);
+    if (!label) { $('kindName').focus(); return; }
+    if (kinds.some(k => k.label === label)) { closeKindAdd(); return; }
+    const k = { id: newKindId(), label, c: nextKindColor() };
+    kinds.push(k);
+    pickedKind = k.id;
+    closeKindAdd();
+    renderKindPick();
+    saveKinds();
+}
+
+function removeKind(id) {
+    const k = kinds.find(x => x.id === id);
+    if (!k) return;
+    const inUse = data.plans.filter(p => p.kind === id).length;
+    askDelete(
+        '種別「' + k.label + '」',
+        inUse ? 'この種別を付けた予定 ' + inUse + ' 件はそのまま残ります。' : '',
+        () => {
+            kinds = kinds.filter(x => x.id !== id);
+            // 昔の予定の見た目が変わらないよう、名前と色だけ残しておく
+            if (inUse) retired[id] = { id: k.id, label: k.label, c: k.c };
+            if (pickedKind === id) pickedKind = '';
+            renderKindPick();
+            renderAll();
+            saveKinds();
+        }
+    );
+}
 
 /* ===== ノートID ===== */
 function newRoomId() {
@@ -215,7 +356,9 @@ async function openRoom(id, seedIfNew, initialName) {
         data = { plans: [], todos: [] };
         hostId = viewerId;
         roomName = (initialName || '').trim() || '名前未設定のノート';
-        await setDoc(ref, { plans: [], todos: [], name: roomName, hostId: viewerId, bannedViewers: [] });
+        kinds = DEFAULT_KINDS.map(k => ({ ...k }));
+        retired = {};
+        await setDoc(ref, { plans: [], todos: [], name: roomName, hostId: viewerId, bannedViewers: [], kinds, retired });
     }
 
     // 通信を待たずに、端末の控えをすぐ映す
@@ -239,6 +382,16 @@ async function openRoom(id, seedIfNew, initialName) {
         }
         roomName = v.name || '';
         bannedViewers = v.bannedViewers || [];
+
+        // 種別を持っていない古いノートには、中身に合わせた既定値を入れて覚えさせる
+        if (Array.isArray(v.kinds) && v.kinds.length) {
+            kinds = v.kinds.map(k => ({ ...k }));
+        } else {
+            kinds = defaultKindsFor(v.plans);
+            setDoc(ref, { kinds }, { merge: true }).catch(() => { /* 次に開いたときに入る */ });
+        }
+        retired = v.retired || {};
+        renderKindPick();
         if (bannedViewers.includes(viewerId) && viewerId !== hostId) { handleKicked(); return; }
 
         // 参加中の顔ぶれは、自分の保存中かどうかに関係なく常に最新にする
@@ -399,10 +552,11 @@ function bodyBlock(company, kind, text) {
         const co = document.createElement('span');
         co.className = 'company';
         co.textContent = company;
-        if (kind) {
+        const info = kindInfo(kind);
+        if (info) {
             const tag = document.createElement('span');
-            tag.className = 'tag tag-' + kind;
-            tag.textContent = KIND_LABEL[kind];
+            tag.className = 'tag kc' + info.c;
+            tag.textContent = info.label;
             co.appendChild(tag);
         }
         body.appendChild(co);
@@ -630,7 +784,8 @@ function renderCal() {
         dots.className = 'cal-dots';
         for (const p of items.slice(0, 3)) {
             const dot = document.createElement('span');
-            dot.className = 'cal-dot' + (p.kind ? ' k-' + p.kind : '');
+            const info = kindInfo(p.kind);
+            dot.className = 'cal-dot' + (info ? ' kc' + info.c : '');
             dots.appendChild(dot);
         }
         if (items.length > 3) {
@@ -835,6 +990,10 @@ function openDemo() {
     demoMode = true;
     roomId = '';
     data = buildDemo();
+    kinds = LEGACY_KINDS.map(k => ({ ...k }));
+    retired = {};
+    editingKinds = false;
+    renderKindPick();
     $('gate').classList.add('hidden');
     $('page').classList.remove('hidden');
     $('demoBar').classList.remove('hidden');
@@ -851,6 +1010,9 @@ function goHome() {
     if (unsubscribe) { unsubscribe(); unsubscribe = null; }
     demoMode = false;
     data = { plans: [], todos: [] };
+    kinds = [];
+    retired = {};
+    editingKinds = false;
     $('page').classList.add('hidden');
     $('demoBar').classList.add('hidden');
     $('modal').classList.add('hidden');
@@ -966,9 +1128,11 @@ function openModal(kind) {
     $('fTitle').value = '';
     $('fTime').value = '';
     $('fEnd').value = '';
-    pickedKind = 'seminar';
+    pickedKind = kinds.length ? kinds[0].id : '';
+    editingKinds = false;
+    closeKindAdd();
     for (const b of document.querySelectorAll('.mkind')) b.classList.toggle('is-on', b.dataset.form === kind);
-    for (const x of document.querySelectorAll('.kpick')) x.classList.toggle('is-on', x.dataset.kind === 'seminar');
+    renderKindPick();
     $('modalKinds').classList.remove('hidden');
     $('modalSave').textContent = '登録する';
     applyFormKind();
@@ -1003,7 +1167,9 @@ function openEdit(id) {
         $('fEnd').value = '';
         pickedKind = '';
     }
-    for (const x of document.querySelectorAll('.kpick')) x.classList.toggle('is-on', x.dataset.kind === pickedKind);
+    editingKinds = false;
+    closeKindAdd();
+    renderKindPick();
 
     $('modalSave').textContent = '直す';
     applyFormKind();
@@ -1018,7 +1184,7 @@ function applyFormKind() {
     $('fEnd').classList.toggle('hidden', !isPlan);
     $('fTilde').classList.toggle('hidden', !isPlan);
     $('labelDate').textContent = isPlan ? '日付' : '期日';
-    $('fTitle').placeholder = isPlan ? 'セミナー名・面談など' : '提出物・受検など';
+    $('fTitle').placeholder = isPlan ? '予定の名前' : 'やること';
     if (isPlan && !$('fDate').value) $('fDate').value = dayKey(0);
 }
 
@@ -1033,10 +1199,31 @@ $('modalKinds').addEventListener('click', e => {
     applyFormKind();
 });
 $('kindPick').addEventListener('click', e => {
+    const x = e.target.closest('.kpick-x');
+    if (x) { removeKind(x.dataset.del); return; }
+
     const b = e.target.closest('.kpick');
     if (!b) return;
+
+    if (b.dataset.act === 'add') { openKindAdd(); return; }
+    if (b.dataset.act === 'edit') {
+        editingKinds = !editingKinds;
+        closeKindAdd();
+        renderKindPick();
+        return;
+    }
+    if (editingKinds) return;   // 整理中は選び直さない
+
     pickedKind = b.dataset.kind;
-    for (const x of document.querySelectorAll('.kpick')) x.classList.toggle('is-on', x === b);
+    renderKindPick();
+});
+
+$('kindAddOk').addEventListener('click', addKind);
+$('kindAddCancel').addEventListener('click', closeKindAdd);
+// フォームの中なので、Enterで登録が走ってしまわないようにする
+$('kindName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addKind(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeKindAdd(); }
 });
 $('modalClose').addEventListener('click', () => $('modal').classList.add('hidden'));
 $('modal').addEventListener('click', e => {
