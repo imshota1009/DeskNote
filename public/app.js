@@ -38,6 +38,54 @@ const LEGACY_KINDS = [
     { id: 'selection', label: '選考', c: 2 }
 ];
 
+// ノートを作るときに選べるひな形。入っているのは種別だけで、予定は空のまま
+const NOTE_TEMPLATES = [
+    {
+        id: 'daily', label: '日常', name: 'わが家のノート',
+        kinds: DEFAULT_KINDS
+    },
+    {
+        id: 'job', label: '就活・インターン', name: '就活ノート',
+        kinds: [
+            { id: 'seminar', label: 'セミナー', c: 0 },
+            { id: 'intern', label: 'インターン', c: 1 },
+            { id: 'selection', label: '選考', c: 2 },
+            { id: 'ob', label: 'OB訪問', c: 3 },
+            { id: 'doc', label: '提出物', c: 5 }
+        ]
+    },
+    {
+        id: 'school', label: '学校', name: '学校のノート',
+        kinds: [
+            { id: 'class', label: '授業', c: 2 },
+            { id: 'task', label: '課題', c: 5 },
+            { id: 'exam', label: '試験', c: 1 },
+            { id: 'club', label: '部活', c: 3 },
+            { id: 'event', label: '行事', c: 4 }
+        ]
+    },
+    {
+        id: 'work', label: '仕事', name: '仕事のノート',
+        kinds: [
+            { id: 'meeting', label: '会議', c: 2 },
+            { id: 'deadline', label: '締切', c: 1 },
+            { id: 'trip', label: '出張', c: 3 },
+            { id: 'shift', label: 'シフト', c: 5 },
+            { id: 'other', label: 'その他', c: 7 }
+        ]
+    },
+    {
+        id: 'family', label: '家族・暮らし', name: '家族のノート',
+        kinds: [
+            { id: 'hospital', label: '通院', c: 0 },
+            { id: 'shopping', label: '買い物', c: 4 },
+            { id: 'school2', label: '学校・園', c: 2 },
+            { id: 'event2', label: '行事', c: 3 },
+            { id: 'pay', label: '支払い', c: 1 }
+        ]
+    }
+];
+
 const KIND_COLORS = 8;      // style.css に用意してある色の数
 const KIND_MAX = 10;        // 一行に収まる範囲
 const KIND_NAME_MAX = 8;
@@ -376,7 +424,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /* ===== 保存と読み込み ===== */
-async function openRoom(id, seedIfNew, initialName) {
+async function openRoom(id, seedIfNew, initialName, seedKinds) {
     roomId = id;
     localStorage.setItem(ROOM_KEY, id);
 
@@ -394,7 +442,7 @@ async function openRoom(id, seedIfNew, initialName) {
         data = { plans: [], todos: [] };
         hostId = viewerId;
         roomName = (initialName || '').trim() || '名前未設定のノート';
-        kinds = DEFAULT_KINDS.map(k => ({ ...k }));
+        kinds = (seedKinds && seedKinds.length) ? seedKinds : DEFAULT_KINDS.map(k => ({ ...k }));
         retired = {};
         await setDoc(ref, { plans: [], todos: [], name: roomName, hostId: viewerId, bannedViewers: [], kinds, retired });
     }
@@ -1008,10 +1056,45 @@ $('gateForm').addEventListener('submit', async e => {
 });
 
 let madeId = '';
+let pickedTemplate = NOTE_TEMPLATES[0];
+
+function templateKinds() {
+    return pickedTemplate.kinds.map(k => ({ ...k }));
+}
+
+// ひな形の選択肢。押すと、その中身を下に出す
+function renderTemplatePick() {
+    const box = $('tplPick');
+    box.innerHTML = '';
+    for (const t of NOTE_TEMPLATES) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tpl' + (t.id === pickedTemplate.id ? ' is-on' : '');
+        b.dataset.tpl = t.id;
+        b.textContent = t.label;
+        box.appendChild(b);
+    }
+    $('tplKinds').textContent = '種別：' + pickedTemplate.kinds.map(k => k.label).join('・');
+}
+
+$('tplPick').addEventListener('click', e => {
+    const b = e.target.closest('.tpl');
+    if (!b) return;
+    const t = NOTE_TEMPLATES.find(x => x.id === b.dataset.tpl);
+    if (!t) return;
+    const before = pickedTemplate;
+    pickedTemplate = t;
+    renderTemplatePick();
+    // 呼び名がまだ空か、前のひな形の名前のままなら入れ替える
+    const nameEl = $('gateMadeLabel');
+    if (!nameEl.value.trim() || nameEl.value.trim() === before.name) nameEl.value = t.name;
+});
 $('gateNew').addEventListener('click', () => {
     madeId = newRoomId();
     $('gateMadeId').textContent = prettyId(madeId);
-    $('gateMadeLabel').value = '';
+    pickedTemplate = NOTE_TEMPLATES[0];
+    renderTemplatePick();
+    $('gateMadeLabel').value = pickedTemplate.name;
     $('gateMade').classList.remove('hidden');
 });
 
@@ -1019,7 +1102,7 @@ $('gateCopy').addEventListener('click', () => copyId(madeId, $('gateCopy')));
 $('gateGo').addEventListener('click', () => {
     const name = $('gateMadeLabel').value.trim();
     rememberNote(madeId, 'created', name);
-    openRoom(madeId, true, name);
+    openRoom(madeId, true, name, templateKinds());
 });
 
 /* ===== お試し ===== */

@@ -24,6 +24,7 @@
 ## ✨ できること
 
 *   **予定の記録** — 日付・時刻・場所・内容を、色分けされた種別付きで登録
+*   **ひな形** — ノートを作るときに「日常 / 就活・インターン / 学校 / 仕事 / 家族・暮らし」から選ぶと、その種別が入った状態で始められます
 *   **種別は自由** — 最初は「仕事・学校・おでかけ・病院」。「種別を編集」から追加・削除できます（消しても、その種別を付けた予定の見た目は変わりません）
 *   **やることリスト** — 期限付きのToDo。終わったものはまとめて隠れます
 *   **4つの見方** — 「あした」「これから」「これまで」「カレンダー」をタブで切り替え
@@ -87,6 +88,7 @@ It is built for leaving open all day on an old tablet propped up on your desk.
 ## ✨ Features
 
 *   **Schedule** — Date, time, place and details, colour-coded by category
+*   **Templates** — Pick Everyday, Job hunting, School, Work or Family when you create a note, and it starts with categories to match
 *   **Your own categories** — Starts with Work, School, Outing and Hospital; add and remove them from the category editor (removing one leaves existing plans looking exactly as they were)
 *   **To-do list** — Tasks with deadlines; finished ones fold away
 *   **Four views** — Tomorrow, Upcoming, Past and Calendar
